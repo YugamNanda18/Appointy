@@ -7,25 +7,33 @@ import appointmentModel from "../models/appointmentModel.js";
 const loginDoctor = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log("INPUT:", email, password);
+
     const user = await doctorModel.findOne({ email });
+    console.log("USER FOUND:", user);
 
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "User not found" });
     }
 
+    console.log("DB PASSWORD:", user.password);
+
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("PASSWORD MATCH:", isMatch);
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Password incorrect" });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.json({ success: true, token });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 // Get doctor's appointments
 const appointmentsDoctor = async (req, res) => {
   try {
