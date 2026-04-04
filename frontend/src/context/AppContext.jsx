@@ -6,7 +6,7 @@ export const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
 
-  const backendUrl = ""; // same domain because Railway serves frontend + backend
+  const backendUrl ="https://appointy-backend-qxya.onrender.com"; // same domain because Railway serves frontend + backend
 
   const [doctors, setDoctors] = useState([]);
   const [token, setToken] = useState(localStorage.getItem("token") || "");
