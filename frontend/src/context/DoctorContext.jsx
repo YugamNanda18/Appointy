@@ -5,7 +5,7 @@ export const DoctorContext = createContext();
 
 const DoctorContextProvider = ({ children }) => {
 
-  const backendUrl = "";
+  const backendUrl = "https://appointy-backend-qxya.onrender.com";
 
   const [dToken, setDToken] = useState(localStorage.getItem("dToken") || "");
   const [dashData, setDashData] = useState(null);
