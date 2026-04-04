@@ -40,23 +40,8 @@ app.get("/test-db", (req, res) => {
   }
 });
 
-// ================= SERVE USER FRONTEND =================
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-// ================= SERVE ADMIN PANEL =================
-app.use("/admin", express.static(path.join(__dirname, "../admin/dist")));
-
-// ================= SAFE FALLBACK (VERY IMPORTANT) =================
-app.use((req, res) => {
-  if (req.originalUrl.startsWith("/admin")) {
-    return res.sendFile(
-      path.join(__dirname, "../admin/dist/index.html")
-    );
-  }
-
-  res.sendFile(
-    path.join(__dirname, "../frontend/dist/index.html")
-  );
+app.get("/",(req,res)=>{
+  res.send("API is running");
 });
 
 // ================= START SERVER =================
