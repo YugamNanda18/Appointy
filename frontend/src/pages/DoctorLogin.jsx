@@ -12,25 +12,33 @@ const DoctorLogin = () => {
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const { data } = await axios.post(
-        backendUrl + "/api/doctor/login",
-        { email, password }
-      );
+  try {
+    const { data } = await axios.post(
+      backendUrl + "/api/doctor/login",
+      { email, password }
+    );
 
-      if (data.success) {
-        setDToken(data.token);
-        localStorage.setItem("dToken", data.token);
-        navigate("/doctor/dashboard");
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      alert("Login failed");
+    if (data.success) {
+      setDToken(data.token);
+      localStorage.setItem("dToken", data.token);
+
+      alert("Login successful ✅");   // ✅ FIXED
+      navigate("/doctor/dashboard");
+
+    } else {
+      alert(data.message || "Invalid credentials ❌"); // ✅ FIXED
     }
-  };
+
+  } catch (error) {
+    alert(
+      error.response?.data?.message || 
+      error.message || 
+      "Login failed ❌"
+    ); // ✅ FIXED
+  }
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-50">
