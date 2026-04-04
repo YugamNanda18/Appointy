@@ -8,7 +8,7 @@ export const AdminContext = createContext()
 const AdminContextProvider = (props) => {
 
     const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
-    const backendUrl = "";
+    const backendUrl = "https://appointy-backend-qxya.onrender.com";
     const [appointments, setAppointments] = useState([])
 
     const [doctors, setDoctors] = useState([])
