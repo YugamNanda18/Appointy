@@ -57,7 +57,7 @@ const razorpayInstance = new Razorpay({
 
     const expected = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
+      .update(body.toString())
       .digest("hex");
 
     if (expected === razorpay_signature) {
