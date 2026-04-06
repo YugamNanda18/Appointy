@@ -15,28 +15,37 @@ const razorpay = new Razorpay({
 
  const paymentRazorpay = async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+
     const { appointmentId } = req.body;
 
-    const appointment = await appointmentModel.findById(appointmentId);
+    if (!appointmentId) {
+      return res.status(400).json({ success: false, message: "No ID" });
+    }
 
-    const options = {
-      amount: appointment.amount * 100,
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    console.log("DATA:", appointmentData);
+
+    if (!appointmentData) {
+      return res.status(400).json({ success: false, message: "Not found" });
+    }
+
+    const order = await razorpayInstance.orders.create({
+      amount: appointmentData.amount * 100,
       currency: "INR",
       receipt: appointmentId,
-    };
-
-    const order = await razorpay.orders.create(options);
-
-    await appointmentModel.findByIdAndUpdate(appointmentId, {
-      orderId: order.id
     });
 
     res.json({ success: true, order });
 
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.log("ERROR:", error);
+    res.status(400).json({ success: false, message: error.message });
   }
 };
+
+    
 
  const verifyRazorpay = async (req, res) => {
   try {
