@@ -7,7 +7,7 @@ import { assets } from '../assets/assets'
 
 const MyAppointments = () => {
 
-  const { backendUrl, token, getDoctorsData, doctors } = useContext(AppContext)
+  const { backendUrl, token, getDoctorsData } = useContext(AppContext)
 
   const navigate = useNavigate()
 
@@ -22,7 +22,7 @@ const MyAppointments = () => {
     return `${day} ${months[Number(month)]} ${year}`
   }
 
-  // Get user appointments
+  // ✅ Get real appointments from backend
   const getUserAppointments = async () => {
     try {
 
@@ -37,13 +37,12 @@ const MyAppointments = () => {
 
     } catch (error) {
       console.log(error)
-      toast.error(error.message)
+      toast.error("Failed to load appointments")
     }
   }
 
-  // Cancel appointment
+  // ✅ Cancel appointment
   const cancelAppointment = async (appointmentId) => {
-
     try {
 
       const { data } = await axios.post(
@@ -62,24 +61,22 @@ const MyAppointments = () => {
 
     } catch (error) {
       console.log(error)
-      toast.error(error.message)
+      toast.error("Cancel failed")
     }
   }
 
-  // Razorpay initialization
+  // ✅ Razorpay popup
   const initPay = (order) => {
 
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      key: "rzp_test_SaBIZZXv7zDJJL", // ✅ DIRECT KEY ADDED
       amount: order.amount,
       currency: order.currency,
-      name: 'Appointment Payment',
-      description: "Appointment Payment",
+      name: "Appointy",
+      description: "Doctor Appointment Payment",
       order_id: order.id,
-      receipt: order.receipt,
 
       handler: async (response) => {
-
         try {
 
           const { data } = await axios.post(
@@ -89,13 +86,15 @@ const MyAppointments = () => {
           )
 
           if (data.success) {
-            navigate('/my-appointments')
+            toast.success("Payment Successful")
             getUserAppointments()
+          } else {
+            toast.error("Verification failed")
           }
 
         } catch (error) {
           console.log(error)
-          toast.error(error.message)
+          toast.error("Payment verification error")
         }
       }
     }
@@ -104,9 +103,8 @@ const MyAppointments = () => {
     rzp.open()
   }
 
-  // Razorpay payment
+  // ✅ Create order → open Razorpay
   const appointmentRazorpay = async (appointmentId) => {
-
     try {
 
       const { data } = await axios.post(
@@ -123,7 +121,7 @@ const MyAppointments = () => {
 
     } catch (error) {
       console.log(error)
-      toast.error(error.message)
+      toast.error("Payment failed")
     }
   }
 
@@ -132,35 +130,6 @@ const MyAppointments = () => {
       getUserAppointments()
     }
   }, [token])
-
-  // Temporary simulated appointments (for testing)
-  useEffect(() => {
-
-    if (doctors.length) {
-
-      const generatedAppointments = doctors.slice(0, 3).map((doc, idx) => ({
-
-        _id: `appointment_${idx}`,
-
-        docData: {
-          name: doc.name,
-          speciality: doc.speciality,
-          image: doc.image,
-          address: doc.address || { line1: "Street X", line2: "City Y" }
-        },
-
-        slotDate: `12_0${idx + 1}_2025`,
-        slotTime: `${10 + idx}:00 AM`,
-        payment: idx === 1,
-        isCompleted: idx === 2,
-        cancelled: false
-
-      }))
-
-      setAppointments(generatedAppointments)
-    }
-
-  }, [doctors])
 
   return (
 
@@ -180,15 +149,13 @@ const MyAppointments = () => {
           >
 
             {/* Doctor Image */}
-
             <img
               className='w-16 h-16 rounded-full object-cover border'
               src={item.docData.image}
-              alt={item.docData.name}
+              alt=""
             />
 
             {/* Doctor Info */}
-
             <div className='flex-1 text-sm text-[#5E5E5E]'>
 
               <p className='text-[#262626] text-base font-semibold'>
@@ -205,22 +172,19 @@ const MyAppointments = () => {
               <p>{item.docData.address.line2}</p>
 
               <p className='mt-1'>
-                <span className='text-sm text-[#3C3C3C] font-medium'>
-                  Date & Time:
-                </span>{" "}
+                <span className='font-medium'>Date & Time:</span>{" "}
                 {slotDateFormat(item.slotDate)} | {item.slotTime}
               </p>
 
             </div>
 
-            {/* Buttons */}
-
+            {/* Actions */}
             <div className='flex flex-col gap-2 text-sm text-center'>
 
               {!item.cancelled && !item.payment && !item.isCompleted && payment !== item._id &&
                 <button
                   onClick={() => setPayment(item._id)}
-                  className='sm:min-w-40 py-2 border rounded hover:bg-primary hover:text-white transition-all'
+                  className='sm:min-w-40 py-2 border rounded hover:bg-primary hover:text-white'
                 >
                   Pay Online
                 </button>
@@ -229,24 +193,20 @@ const MyAppointments = () => {
               {!item.cancelled && !item.payment && !item.isCompleted && payment === item._id &&
                 <button
                   onClick={() => appointmentRazorpay(item._id)}
-                  className='sm:min-w-40 py-2 border rounded flex items-center justify-center'
+                  className='sm:min-w-40 py-2 border rounded flex justify-center'
                 >
-                  <img
-                    className='max-w-20 max-h-5'
-                    src={assets.razorpay_logo}
-                    alt=""
-                  />
+                  <img className='max-w-20' src={assets.razorpay_logo} alt="" />
                 </button>
               }
 
               {!item.cancelled && item.payment && !item.isCompleted &&
-                <button className='sm:min-w-40 py-2 border rounded bg-[#EAEFFF]'>
+                <button className='sm:min-w-40 py-2 border rounded bg-green-100 text-green-600'>
                   Paid
                 </button>
               }
 
               {item.isCompleted &&
-                <button className='sm:min-w-40 py-2 border border-green-500 rounded text-green-500'>
+                <button className='sm:min-w-40 py-2 border border-green-500 text-green-500 rounded'>
                   Completed
                 </button>
               }
@@ -254,15 +214,15 @@ const MyAppointments = () => {
               {!item.cancelled && !item.isCompleted &&
                 <button
                   onClick={() => cancelAppointment(item._id)}
-                  className='sm:min-w-40 py-2 border rounded hover:bg-red-600 hover:text-white transition'
+                  className='sm:min-w-40 py-2 border rounded hover:bg-red-600 hover:text-white'
                 >
-                  Cancel appointment
+                  Cancel
                 </button>
               }
 
-              {item.cancelled && !item.isCompleted &&
-                <button className='sm:min-w-40 py-2 border border-red-500 rounded text-red-500'>
-                  Appointment cancelled
+              {item.cancelled &&
+                <button className='sm:min-w-40 py-2 border border-red-500 text-red-500 rounded'>
+                  Cancelled
                 </button>
               }
 
