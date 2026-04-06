@@ -296,42 +296,6 @@ const listAppointment = async (req, res) => {
 
 // API to make payment of appointment using razorpay
 // Demo API to make payment of appointment
-const paymentRazorpay = async (req, res) => {
-    try {
-        const { appointmentId } = req.body
-        const appointmentData = await appointmentModel.findById(appointmentId)
 
-        if (!appointmentData || appointmentData.cancelled) {
-            return res.json({ success: false, message: 'Appointment Cancelled or not found' })
-        }
-
-        res.json({
-            success: true,
-            message: "Demo Payment Created",
-            order: {
-                id: "demo_order_123"
-            }
-        })
-
-    } catch (error) {
-        res.json({ success: false, message: error.message })
-    }
-}
-
-// API to verify payment of razorpay
-// Demo API to verify payment
-const verifyRazorpay = async (req, res) => {
-    try {
-        const { appointmentId } = req.body
-
-        await appointmentModel.findByIdAndUpdate(appointmentId, { payment: true })
-
-        res.json({ success: true, message: "Payment Successful (Demo Mode)" })
-
-    } catch (error) {
-        res.json({ success: false, message: error.message })
-    }
-}
-
-
+    
 export {registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay, verifyRazorpay}
