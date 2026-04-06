@@ -69,7 +69,7 @@ const MyAppointments = () => {
   const initPay = (order) => {
 
     const options = {
-      key: "rzp_test_SaBIZZXv7zDJJL", // ✅ DIRECT KEY ADDED
+      key:"rzp_test_SaBIZZXv7zDJJL", // ✅ DIRECT KEY ADDED
       amount: order.amount,
       currency: order.currency,
       name: "Appointy",
