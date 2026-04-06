@@ -5,8 +5,71 @@ import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import jwt from "jsonwebtoken";
 import {v2 as cloudinary} from 'cloudinary'  
+import Razorpay from "razorpay";
+import crypto from "crypto";
 
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
+export const paymentRazorpay = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+
+    const appointment = await appointmentModel.findById(appointmentId);
+
+    const options = {
+      amount: appointment.amount * 100,
+      currency: "INR",
+      receipt: appointmentId,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      orderId: order.id
+    });
+
+    res.json({ success: true, order });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const verifyRazorpay = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expected = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    if (expected === razorpay_signature) {
+
+      const appointment = await appointmentModel.findOne({
+        orderId: razorpay_order_id
+      });
+
+      await appointmentModel.findByIdAndUpdate(appointment._id, {
+        payment: true,
+        paymentId: razorpay_payment_id
+      });
+
+      res.json({ success: true });
+
+    } else {
+      res.json({ success: false, message: "Payment Failed" });
+    }
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
     
 
 // API to register user
