@@ -36,6 +36,8 @@ const razorpayInstance = new Razorpay({
       currency: "INR",
       receipt: appointmentId,
     });
+    appointmentData.orderid = orderid;
+    await appointmentData.save();
 
     res.json({ success: true, order });
 
